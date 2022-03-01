@@ -50,6 +50,7 @@
 static int big_list_size = BIG_LIST;
 
 void q_linuxsort(struct list_head *head);
+void q_shuffle(struct list_head *head);
 
 /* Global variables */
 
@@ -684,6 +685,33 @@ bool do_linuxsort(int argc, char *argv[])
     show_queue(3);
     return ok && !error_check();
 }
+bool do_shuffle(int argc, char *argv[])
+{
+    if (argc != 1) {
+        report(1, "%s takes no arguments", argv[0]);
+        return false;
+    }
+
+    if (!l_meta.l)
+        report(3, "Warning: Calling shuffle on null queue");
+    error_check();
+
+    int cnt = q_size(l_meta.l);
+    if (cnt < 2)
+        report(3, "Warning: Calling shuffle on single node");
+    error_check();
+
+    set_noallocate_mode(true);
+    if (exception_setup(true))
+        q_shuffle(l_meta.l);
+    exception_cancel();
+    set_noallocate_mode(false);
+
+    bool ok = true;
+
+    show_queue(3);
+    return ok && !error_check();
+}
 
 static bool do_dm(int argc, char *argv[])
 {
@@ -843,6 +871,9 @@ static void console_init()
     ADD_COMMAND(
         linuxsort,
         "                | Use Linux kernel built-in function to sort list");
+    ADD_COMMAND(
+        shuffle,
+        "                | Use Fisher and Yates algorithm to shuffle list");
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",

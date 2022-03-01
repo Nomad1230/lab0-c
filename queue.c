@@ -480,3 +480,18 @@ void q_linuxsort(struct list_head *head)
 {
     list_sort(0, head);
 }
+
+void q_shuffle(struct list_head *head)
+{
+    struct list_head *select = head;
+    for (int size = q_size(head), rnd; size > 0; size--) {
+        rnd = rand() % size + 1;
+        do {
+            select = select->next;
+            rnd--;
+        } while (rnd > 0);
+        list_del_init(select);
+        list_add_tail(select, head);
+        select = head;
+    }
+}
